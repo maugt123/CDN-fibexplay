@@ -1,0 +1,1 @@
+{"user_info":{"username":"20000001","auth":1},"server_info":{"url":"ccs.fibexplay.tv","port":"80","https_port":"443","server_protocol":"http"}}

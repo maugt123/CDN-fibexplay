@@ -1,0 +1,9 @@
+# Compilados
+dist/
+
+# Configuración real (contiene claves)
+fibex-cdn.env
+rutas.csv
+
+# Documentos internos de Fibex, no van al repo que se comparte
+*.pdf

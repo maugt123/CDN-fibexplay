@@ -1,0 +1,40 @@
+# Laboratorio local: un MySQL con una tabla `lines` como la de XUI, tres
+# "nodos" de mentira y el binario de Linux corriendo en Debian.
+#   .\compilar.ps1
+#   docker compose -f pruebas/docker-compose.yml up -d
+#   curl.exe -sI http://localhost:8088/live/20000001/clave/586.m3u8
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: raiz-solo-laboratorio
+      MYSQL_DATABASE: xui
+    volumes:
+      - ./xui-lines.sql:/docker-entrypoint-initdb.d/01-lines.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-praiz-solo-laboratorio"]
+      interval: 3s
+      retries: 40
+
+  caracas:
+    image: nginx:alpine
+    volumes: [./nodos/caracas:/usr/share/nginx/html:ro]
+  valencia:
+    image: nginx:alpine
+    volumes: [./nodos/valencia:/usr/share/nginx/html:ro]
+  maracay:
+    image: nginx:alpine
+    volumes: [./nodos/maracay:/usr/share/nginx/html:ro]
+
+  cdn:
+    image: debian:bookworm-slim
+    command: ["/opt/fibex-cdn", "servir", "--config", "/etc/fibex-cdn/fibex-cdn.env"]
+    volumes:
+      - ../dist/fibex-cdn-linux-amd64:/opt/fibex-cdn:ro
+      - ./cdn.env:/etc/fibex-cdn/fibex-cdn.env:ro
+    ports: ["8088:80"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      caracas: {condition: service_started}
+      valencia: {condition: service_started}
+      maracay: {condition: service_started}
